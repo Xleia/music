@@ -75,4 +75,35 @@ export default {
   updateTitle(state, title) {
     state.title = title;
   },
+  fullOrWindowLyrics(state) {
+    const flag = state.fullState;
+    if (!flag) {
+      //全屏
+      const docElm = document.documentElement;
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.msRequestFullscreen) {
+        docElm.msRequestFullscreen();
+      } else if (docElm.mozRequestFullScreen) {
+        docElm.mozRequestFullScreen();
+      } else if (docElm.webkitRequestFullScreen) {
+        docElm.webkitRequestFullScreen();
+      }
+    } else {
+      //退出全屏
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+    state.fullState = !state.fullState;
+  },
+  setFullscreen(state) {
+    state.fullState = !state.fullState;
+  },
 };

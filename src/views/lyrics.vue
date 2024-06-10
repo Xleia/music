@@ -268,6 +268,11 @@
           <svg-icon icon-class="arrow-down" />
         </button>
       </div>
+      <div class="full-button">
+        <button class="full-screen-lyrics-button" @click="fullOrWindowLyrics">
+          <svg-icon :icon-class="fullscreenIcon" style="filter: invert(1)" />
+        </button>
+      </div>
     </div>
   </transition>
 </template>
@@ -308,7 +313,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['player', 'settings', 'showLyrics']),
+    ...mapState(['player', 'settings', 'showLyrics', 'fullState']),
     currentTrack() {
       return this.player.currentTrack;
     },
@@ -415,6 +420,9 @@ export default {
     theme() {
       return this.settings.lyricsBackground === true ? 'dark' : 'auto';
     },
+    fullscreenIcon() {
+      return this.fullState ? 'exit-full-screen' : 'full-screen';
+    },
   },
   watch: {
     currentTrack() {
@@ -431,6 +439,9 @@ export default {
       }
     },
   },
+  mounted() {
+    window.addEventListener('keydown', this.handleEscKey);
+  },
   created() {
     this.getLyric();
     this.getCoverColor();
@@ -440,12 +451,18 @@ export default {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    window.removeEventListener('keydown', this.handleEscKey);
   },
   destroyed() {
     clearInterval(this.lyricsInterval);
   },
   methods: {
-    ...mapMutations(['toggleLyrics', 'updateModal']),
+    ...mapMutations([
+      'toggleLyrics',
+      'updateModal',
+      'setFullscreen',
+      'fullOrWindowLyrics',
+    ]),
     ...mapActions(['likeATrack']),
     initDate() {
       var _this = this;
@@ -613,6 +630,11 @@ export default {
     },
     mute() {
       this.player.mute();
+    },
+    handleEscKey(event) {
+      if ((this.fullState && event.key === 'Escape') || event.keyCode === 27) {
+        this.setFullscreen();
+      }
     },
   },
 };
@@ -955,7 +977,35 @@ export default {
 .close-button {
   position: fixed;
   top: 24px;
-  right: 24px;
+  right: 60px;
+  z-index: 300;
+  border-radius: 0.75rem;
+  height: 44px;
+  width: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.28;
+  transition: 0.2s;
+  -webkit-app-region: no-drag;
+
+  .svg-icon {
+    color: var(--color-text);
+    padding-top: 5px;
+    height: 22px;
+    width: 22px;
+  }
+
+  &:hover {
+    background: var(--color-secondary-bg-for-transparent);
+    opacity: 0.88;
+  }
+}
+
+.full-button {
+  position: fixed;
+  top: 24px;
+  right: 20px;
   z-index: 300;
   border-radius: 0.75rem;
   height: 44px;
